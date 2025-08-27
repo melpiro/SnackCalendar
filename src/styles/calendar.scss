@@ -1,12 +1,21 @@
 @import "sizing.scss";
 
+.centered{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 #calendar{
 
-    position: absolute;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     // flex-wrap: wrap;
+    width: ratio-from(1200px);
+    margin-bottom: 50vh;
+    row-gap: ratio-from(20px);
 
     .day{
         display: flex;
@@ -17,7 +26,7 @@
     }
 
     .date{
-        background-color: #565656;
+        background-color: #264357;
         border-right: solid ratio-from(2px) #000000;
         color: white;
         height: ratio-from(40px);
@@ -25,7 +34,17 @@
         justify-content: center;
         align-items: center;
         font-size: ratio-from(25px);
+        border-top: solid ratio-from(2px) #000000;
     }
+    // one over two
+    .day:nth-child(2n+1) .date{
+        background-color: #36566b;
+    }
+
+    .day:nth-child(4n+1) .date{
+        border-left: solid ratio-from(2px) #000000;
+    }
+
 
     .today>.date{
         font-weight: bold;
@@ -34,6 +53,7 @@
     .content{
         background-color: #f0f0f0;
         border-right: solid ratio-from(2px) rgb(88, 88, 88);
+        
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -41,15 +61,33 @@
         align-items: center;
         box-sizing: border-box; 
         position: relative;
+        border-bottom: solid ratio-from(2px) rgb(88, 88, 88);
 
+    }
+
+    .day:nth-child(4n+1)>.content{
+        border-left: solid ratio-from(2px) rgb(88, 88, 88);
+    }
+
+   
+
+
+    div[stage=edit]>.content, div[stage=participate]>.content{
+        gap: ratio-from(10px);
     }
 
     div[stage=took]>.content{
-        flex-direction: column;
         justify-content: flex-start;
         align-items: start;
         padding: ratio-from(20px);
+        padding-top: ratio-from(45px);
     }
+
+    ul>li{
+        margin-bottom: ratio-from(5px);
+    }
+
+
     
     .edit-buttons{
         position: absolute;
@@ -58,5 +96,8 @@
     }
     .edit-buttons>*{
         margin: 0 ratio-from(2px);
+    }
+    .buttons>*{
+        margin: 0 ratio-from(5px);
     }
 }

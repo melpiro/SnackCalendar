@@ -86,7 +86,8 @@ class Home {
 
     public constructor() {
         this.loaded_until = new Date();
-        this.loaded_until.setDate(this.loaded_until.getDate() - 7);
+        let day_of_week = this.loaded_until.getDay();
+        this.loaded_until.setDate(this.loaded_until.getDate() - day_of_week);
         this.load_until = new Date();
         // load the next month
         this.load_until.setMonth(this.loaded_until.getMonth() + 1);
@@ -112,7 +113,6 @@ class Home {
         }
         let nbDays: number = date_diff_days(this.loaded_until, this.load_until);
 
-        
 
         for (let i = 0; i <= nbDays; i++) {
             let date: Date = new Date(this.loaded_until);
@@ -158,16 +158,16 @@ class Home {
         document.getElementById("month-year")!.innerHTML = `${MONTH[this.selected.getMonth()]} ${this.selected.getFullYear()}`;
         
 
-        this.html.style.transform = 'translateX(0px)';
+        // this.html.style.transform = 'translateX(0px)';
 
-        // find the x position of the day in page
-        let rect = dayElement.getBoundingClientRect();
-        let x = rect.left + rect.width / 2;
+        // // find the x position of the day in page
+        // let rect = dayElement.getBoundingClientRect();
+        // let x = rect.left + rect.width / 2;
 
-        let pageWidth = document.body.clientWidth;
-        let delta = x - pageWidth / 2 ;
+        // let pageWidth = document.body.clientWidth;
+        // let delta = x - pageWidth / 2 ;
 
-        this.html.style.transform = `translateX(${-delta}px)`;
+        // this.html.style.transform = `translateX(${-delta}px)`;
     }
 
     private async updateCalendarDB() {
@@ -262,7 +262,7 @@ class Home {
         }
 
         let buttons = el.querySelector(".buttons") as HTMLElement;
-        let cancel_btn = html_to_element(`<a class="btn cancel"> Annuler </a>`);
+        let cancel_btn = html_to_element(`<a class="btn edit"> Annuler </a>`);
         let valid_btn = html_to_element(`<a class="btn valid"> Valider </a>`);
         buttons.appendChild(cancel_btn);
         buttons.appendChild(valid_btn);
