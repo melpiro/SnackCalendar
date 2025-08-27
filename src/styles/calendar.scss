@@ -1,0 +1,62 @@
+@import "sizing.scss";
+
+
+#calendar{
+
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    // flex-wrap: wrap;
+
+    .day{
+        display: flex;
+        flex-direction: column;
+
+        width: ratio-from(300px);
+        height: ratio-from(300px);
+    }
+
+    .date{
+        background-color: #565656;
+        border-right: solid ratio-from(2px) #000000;
+        color: white;
+        height: ratio-from(40px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: ratio-from(25px);
+    }
+
+    .today>.date{
+        font-weight: bold;
+    }
+
+    .content{
+        background-color: #f0f0f0;
+        border-right: solid ratio-from(2px) rgb(88, 88, 88);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box; 
+        position: relative;
+
+    }
+
+    div[stage=took]>.content{
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: start;
+        padding: ratio-from(20px);
+    }
+    
+    .edit-buttons{
+        position: absolute;
+        top: ratio-from(10px);
+        right: ratio-from(10px);
+    }
+    .edit-buttons>*{
+        margin: 0 ratio-from(2px);
+    }
+}
