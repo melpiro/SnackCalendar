@@ -18,6 +18,8 @@ window.addEventListener('load', () => {
     document.getElementById('signup-btn')?.addEventListener('click', () => {
         errorManager.handleErrors(signup);
     });
+
+
 });
 
 
@@ -27,21 +29,24 @@ async function signup() {
     const email = (document.getElementById('email') as HTMLInputElement);
     const password1 = (document.getElementById('password1') as HTMLInputElement);
     const password2 = (document.getElementById('password2') as HTMLInputElement);
+    const username_value = username.value.trim().toLowerCase();
+    const email_value = email.value.trim().toLowerCase();
+
 
     // Perform validation checks, if invalid set error class
-    if (!username.value) {
+    if (!username_value) {
         username.classList.add('error');
-        throw new Error("Veuillez entrer un nom d'utilisateur.");
+        throw new Error("Veuillez entrer un prénom.");
     } // check that name only contains letters or - and do not start or end with -
-    if (!/^[a-zA-Z][a-zA-Z-]*[a-zA-Z]$/.test(username.value) || username.value.includes('--')) {
+    if (!/^[a-zA-Z][a-zA-Z-]*[a-zA-Z]$/.test(username_value) || username_value.includes('--')) {
         username.classList.add('error');
-        throw new Error("Le nom de famille ne doit contenir que des lettres, ou des tirets.");
+        throw new Error("Le prénom ne doit contenir que des lettres, ou des tirets.");
     } // check that name is between 2 and 20 characters
-    if (username.value.length < 2 || username.value.length > 20) {
+    if (username_value.length < 2 || username_value.length > 20) {
         username.classList.add('error');
-        throw new Error("Le nom de famille doit contenir entre 2 et 20 caractères.");
+        throw new Error("Le prénom doit contenir entre 2 et 20 caractères.");
     } // check that name does not start with a number
-    if (!email.value || !email.value.includes('@')) {
+    if (!email_value || !email_value.includes('@')) {
         email.classList.add('error');
         throw new Error('Veuillez entrer une adresse e-mail valide.');
     } if (!password1.value || !password2.value) {
@@ -62,7 +67,7 @@ async function signup() {
 
     try {
         loading.show();
-        await userManager.signup(username.value, email.value, password1.value);
+        await userManager.signup(username_value, email_value, password1.value);
         loading.hide();
         // Redirect to home page after successful signup
         window.location.href = '/home.html';

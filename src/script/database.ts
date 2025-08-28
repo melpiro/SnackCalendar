@@ -8,9 +8,18 @@ export type CalendarElement = {
     user: string;
     snacks: string[];
     time: number;
+    as: string|null;
+};
+
+export type UserData = {
+    name: string;
+    role: string;
+    email: string;
 };
 
 export type Calendar = { [id: number] : CalendarElement; }
+
+export type UserSet = { [id: string] : UserData; }
 
 export class DatabaseManager{
 
@@ -20,13 +29,12 @@ export class DatabaseManager{
         this.db = db;
     }
 
-    public async add_new_user_data(user: string, name:string) {
+    public async add_new_user_data(user: string, name:string, email:string): Promise<void> {
         await FS.setDoc(FS.doc(this.db, 'users', user), {
             name: name,
-            role: 'user'
+            role: 'user',
+            email: email
         });
-        console.log("ok");
-        
     }
 
     public async get_role(user: string): Promise<string> {
@@ -47,7 +55,7 @@ export class DatabaseManager{
         return id * 86400000; // 1000 * 60 * 60 * 24 convert to milliseconds
     }
 
-    public async participate(user: string, time:number, snacks:string[]): Promise<boolean> {
+    public async participate(user: string, time:number, snacks:string[], participate_as:string): Promise<boolean> {
         time = DatabaseManager.time_to_id(time)
 
         // check if an user already participated
@@ -57,24 +65,31 @@ export class DatabaseManager{
             return false; // user already participated
         }
 
-        await FS.setDoc(FS.doc(this.db, 'calendar', time.toString()), {
+        let data= {
             user: user,
             snacks: snacks,
             time: time
-        }).catch((error) => {
+        };
+        if (participate_as != '') {
+            data['as'] = participate_as;
+        }
+        
+
+        await FS.setDoc(FS.doc(this.db, 'calendar', time.toString()), data).catch((error) => {
             console.error("Error adding document: ", error);
             return false;
         });
         return true;
     }
 
-    public async modify_participation(user: string, time:number, snacks:string[]): Promise<boolean> {
+    public async modify_participation(user: string, time:number, snacks:string[], participate_as:string): Promise<boolean> {
         time = DatabaseManager.time_to_id(time)
 
         await FS.setDoc(FS.doc(this.db, 'calendar', time.toString()), {
             user: user,
             snacks: snacks,
-            time: time
+            time: time,
+            as: participate_as
         }).catch((error) => {
             console.error("Error adding document: ", error);
             return false;
@@ -106,8 +121,12 @@ export class DatabaseManager{
             calendar[time] = {
                 user: data.user,
                 snacks: data.snacks,
-                time: data.time
+                time: data.time,
+                as: null
             };
+            if (data.hasOwnProperty('as')) {
+                calendar[time].as = data.as;
+            }
         });
         return calendar;
     }
@@ -122,6 +141,31 @@ export class DatabaseManager{
             console.error("No such document!");
             return undefined;
         }
+    }
+
+    public async getAllUsers(): Promise<UserSet> {
+        const usersRef = FS.collection(this.db, 'users');
+        const querySnapshot = await FS.getDocs(usersRef);
+        const users: UserSet = {};
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            users[doc.id] = {
+                name: data.name,
+                role: data.role,
+                email: data.email
+            };
+        });
+        return users;
+    }
+
+    public async update_user_name(id: string, name: string): Promise<void> {
+        const userRef = FS.doc(this.db, 'users', id);
+        await FS.updateDoc(userRef, {
+            name: name
+        }).catch((error) => {
+            console.error("Error updating document: ", error);
+            throw error;
+        });
     }
 
 };

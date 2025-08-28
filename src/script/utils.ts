@@ -16,3 +16,8 @@ export function format_name(name: string): string {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 }
+
+export function format_string(str: string): string {
+    // first letter uppercase, rest lowercase
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}

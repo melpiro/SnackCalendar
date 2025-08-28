@@ -41,7 +41,7 @@ export class UserManager {
             });
             this.user = user;
             console.log("Add new user data to database :");
-            await this.databaseManager.add_new_user_data(user.uid, username);
+            await this.databaseManager.add_new_user_data(user.uid, username, email);
             return user;
         } catch (error) {
             throw new Error(`Error signing up: ${error instanceof Error ? error.message : 'Unknown error'}`);

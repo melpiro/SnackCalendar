@@ -3,7 +3,7 @@ import { Loading } from "../loading";
 import { redirectToLogin } from "../redirect";
 import { UserManager } from "../user-manager";
 import { auth, db } from '../init-firebase';
-import { html_to_element } from "../utils";
+import { format_name, format_string, html_to_element } from "../utils";
 import { Calendar, CalendarElement, DatabaseManager } from "../database";
 import { errorManager } from "../error-manager";
 import { HeaderManager } from "../header";
@@ -23,14 +23,13 @@ window.addEventListener('load', () => {
     headerManager = new HeaderManager(userManager);
     loading = new Loading();
 
-
+    
 
     redirectToLogin(userManager);
 
     var home = new Home();
     loading.show();
     home.createCalendar();
-    loading.hide();
 
     window.addEventListener('resize', () => {
         home.resize();
@@ -56,12 +55,6 @@ function round_date(date: Date): Date {
     return new Date(Math.floor(date.getTime() / (86400000)) * (86400000));
 }
 
-// // detect mouse move
-// window.addEventListener('mousemove', (event: MouseEvent) => {
-//     let x = event.clientX;
-//     let y = event.clientY;
-//     console.log(`Mouse moved to (${x}, ${y})`);
-// });
 
 
 
@@ -72,6 +65,7 @@ class Home {
 
     date_list: Date[] = [];
     html: HTMLElement | null = null;
+    html_days: HTMLElement[] = [];
 
     today: Date = new Date();
     today_index: number = -1;
@@ -87,10 +81,10 @@ class Home {
     public constructor() {
         this.loaded_until = new Date();
         let day_of_week = this.loaded_until.getDay();
-        this.loaded_until.setDate(this.loaded_until.getDate() - day_of_week);
+        this.loaded_until.setDate(this.loaded_until.getDate() - day_of_week + 1);
         this.load_until = new Date();
         // load the next month
-        this.load_until.setMonth(this.loaded_until.getMonth() + 1);
+        this.load_until.setMonth(this.loaded_until.getMonth() + 2);
         this.today = new Date();
 
         console.log("ask for user role");
@@ -100,6 +94,7 @@ class Home {
             
             if (role == "admin"){
                 this.updateCalendarDB();
+                headerManager.show_admin_button();
             }
         });
             
@@ -109,23 +104,35 @@ class Home {
     public async createCalendar() {    
         if (this.html === null) {
             this.html = document.getElementById('calendar') as HTMLElement;
-            this.html.innerHTML = '';
+            this.html.innerHTML = `<h2 class="month-year">${MONTH[this.loaded_until.getMonth()]} ${this.loaded_until.getFullYear()}</h2>`;
         }
         let nbDays: number = date_diff_days(this.loaded_until, this.load_until);
 
-
+        let last_date = new Date(this.loaded_until);
         for (let i = 0; i <= nbDays; i++) {
             let date: Date = new Date(this.loaded_until);
             date.setDate(date.getDate() + i);
             date = round_date(date);
+
+            if (last_date.getMonth() !== date.getMonth()) {
+                for (let i = 0; i < 3; i++) {
+                    this.html.appendChild(html_to_element(`<div class="filler"></div>`));
+                }
+                this.html.appendChild(html_to_element(`<h2 class="month-year">${MONTH[date.getMonth()]} ${date.getFullYear()}</h2>`));
+            }
             
             if (date.getDay() === 1 || date.getDay() === 2 || date.getDay() === 4 || date.getDay() === 5) {
                 let day: HTMLElement = html_to_element(`<div class="day" stage="null"><span class="date">${date_to_string(date)}</span><div class="content"></div></div>`);
                 day.childNodes[1].appendChild(this.getNullStageElement(date));
                 
                 this.html.appendChild(day);
+                this.html_days.push(day);
                 this.date_list.push(date);
             }
+            last_date = date;
+        }
+        for (let i = 0; i < 3; i++) {
+            this.html.appendChild(html_to_element(`<div class="filler"></div>`));
         }
         this.loaded_until = new Date(this.load_until);
 
@@ -152,22 +159,8 @@ class Home {
 
     private updateCalendarDisplay() {
 
-        let dayElement: HTMLElement = this.html.childNodes[this.selected_index] as HTMLElement;
-        dayElement.classList.add('today');
-
-        document.getElementById("month-year")!.innerHTML = `${MONTH[this.selected.getMonth()]} ${this.selected.getFullYear()}`;
-        
-
-        // this.html.style.transform = 'translateX(0px)';
-
-        // // find the x position of the day in page
-        // let rect = dayElement.getBoundingClientRect();
-        // let x = rect.left + rect.width / 2;
-
-        // let pageWidth = document.body.clientWidth;
-        // let delta = x - pageWidth / 2 ;
-
-        // this.html.style.transform = `translateX(${-delta}px)`;
+        let dayElement: HTMLElement = this.html_days[this.selected_index] as HTMLElement;
+        dayElement.classList.add('today');        
     }
 
     private async updateCalendarDB() {
@@ -189,7 +182,7 @@ class Home {
             
             
             if (date.getDay() === 1 || date.getDay() === 2 || date.getDay() === 4 || date.getDay() === 5) {
-                let day: HTMLElement = this.html.childNodes[i] as HTMLElement;
+                let day: HTMLElement = this.html_days[i] as HTMLElement;
                 
 
                 if (day.getAttribute("stage") === "null") {
@@ -224,22 +217,25 @@ class Home {
             }
         }
         this.updateCalendarDB_running = false;
+        loading.hide();
     }
         
 
     private getNullStageElement(date:Date): HTMLElement {
         let el = html_to_element(`<a class="btn valid"> Je participe </a>`);
         el.addEventListener('click', () => {
+            this.hide_all_confirm_delete();
             this.switch_participate(date);
         });
         return el;
     }
     private getParticipateStageElement(date:Date, edit=false): NodeListOf<ChildNode> {
-        let el =  html_to_element(`<div><span>Vous apportez :</span> <ul></ul> <div class="buttons"></div></div>`);
+        let el =  html_to_element(`<div><span>Vous apportez :</span> <ul></ul> <div class="as-name-container"></div> <div class="buttons"></div></div>`);
         let snacks = [];
+        let admin = userManager.getRole() === "admin";
+        let as_name_input: HTMLInputElement | null = null;
         if (edit) {
             snacks = this.db_data[date.getTime()].snacks;
-            
         }
 
 
@@ -247,7 +243,7 @@ class Home {
         for (let i = 0; i <= snacks.length; i++) {
             let value = "";
             if (i < snacks.length) {
-                value = snacks[i];
+                value = format_string(snacks[i]);
             }
             let li = html_to_element(`<li><input type="text" class="snacks-input"></li>`);
             let input = li.childNodes[0] as HTMLInputElement;
@@ -259,6 +255,14 @@ class Home {
                 input_focusout(input);
             });
             ul!.appendChild(li);
+        }
+
+        if (admin && !edit) {
+            let as_name_container = el.querySelector(".as-name-container") as HTMLElement;
+            let title = html_to_element(`<span>Participer en tant que :</span>`);
+            as_name_input = html_to_element(`<input type="text" class="snacks-input" placeholder="Prénom">`) as HTMLInputElement;
+            as_name_container.appendChild(title);
+            as_name_container.appendChild(as_name_input);
         }
 
         let buttons = el.querySelector(".buttons") as HTMLElement;
@@ -274,20 +278,33 @@ class Home {
             let snacks = [];
             for (let li of ul.children) {
                 let input = li.childNodes[0] as HTMLInputElement;
-                let v = input.value.trim();
+                let v = input.value.trim().toLowerCase();
                 if (v !== "") {
                     snacks.push(v);
                 }
             }
+            if (snacks.length === 0) {
+                errorManager.showError("Veuillez entrer au moins un goûter.");
+                return;
+            }
+
+            let participate_as = "";
+            
             
             if (!edit){
-                errorManager.handleErrors(()=>this.participate(date, snacks).then(()=>{
+                if (admin && as_name_input) {
+                    participate_as = as_name_input.value.trim();
+                }
+                errorManager.handleErrors(async ()=>this.participate(date, snacks, participate_as).then(()=>{
                     this.switch_participate(date);
                     this.updateCalendarDB()
                 }));
             }
             else {
-                errorManager.handleErrors(()=>this.modify_participation(date, snacks).then(()=>{
+                if (this.db_data[date.getTime()].as) {
+                    participate_as = this.db_data[date.getTime()].as!;
+                }
+                errorManager.handleErrors(async ()=>this.modify_participation(date, snacks, participate_as).then(()=>{
                     this.switch_participate(date);
                     setTimeout(()=>this.updateCalendarDB()); // wait for the animation to finish
                 }));
@@ -343,8 +360,14 @@ class Home {
 
         return el.childNodes
     }
+
+
     public getTookStageElement(date: Date, data:CalendarElement): HTMLElement {
         let username = usernames[data.user];
+
+        if (data.as){
+            username = data.as;
+        }
         
         if (username === undefined) {
             this.loadUsername(data.user);
@@ -373,18 +396,49 @@ class Home {
 
             edit_btn.addEventListener('click', () => {
                 this.switch_participate(date, true);
-            });
-            delete_btn.addEventListener('click', () => {
-                errorManager.handleErrors(()=>this.cancel_participation(date).then(()=>this.updateCalendarDB()));
+                this.hide_all_confirm_delete();
             });
 
+            if (userManager.getRole() !== "admin"){
+                delete_btn.addEventListener('click', () => {
+                    errorManager.handleErrors(async ()=>this.cancel_participation(date).then(()=>this.updateCalendarDB()));
+                });
+            } else {
+                let confirm = document.createElement("div");
+                confirm.classList.add("confirm-delete");
+                confirm.classList.add("hidden");
+                confirm.innerHTML = `<h3>Confirmer ?</h3>`;
+                let yes_btn = html_to_element(`<a class="btn delete"> Oui </a>`);
+                let no_btn = html_to_element(`<a class="btn valid"> Non </a>`);
+                let btn_div = document.createElement("div");
+                btn_div.appendChild(yes_btn);
+                btn_div.appendChild(no_btn);
+                confirm.appendChild(btn_div);
 
+
+                delete_btn.addEventListener('click', () => {
+                    this.hide_all_confirm_delete();
+                    if (this.participate_mode_index !== -1) {
+                        this.switch_participate(this.date_list[this.participate_mode_index]);
+                    }
+                    confirm.classList.remove("hidden");
+                });
+
+                no_btn.addEventListener('click', () => {
+                    confirm.classList.add("hidden");
+                });
+                yes_btn.addEventListener('click', () => {
+                    errorManager.handleErrors(async ()=>this.cancel_participation(date).then(()=>this.updateCalendarDB()));
+                    confirm.classList.add("hidden");
+                });
+                el.appendChild(confirm);
+            }
         }
 
         let ul = el.querySelector("ul");
         if (data.snacks && data.snacks.length > 0) {
             for (let snack of data.snacks) {
-                let li = html_to_element(`<li>${snack}</li>`);
+                let li = html_to_element(`<li>${format_string(snack)}</li>`);
                 ul!.appendChild(li);
             }
         } else {
@@ -394,13 +448,21 @@ class Home {
         return el;
     }
 
+    public hide_all_confirm_delete(): void {
+        let confirms = document.getElementsByClassName("confirm-delete");
+        for (let i = 0; i < confirms.length; i++) {
+            let confirm = confirms[i] as HTMLElement;
+            confirm.classList.add("hidden");
+        }
+    }
+
 
     public switch_participate(date: Date, edit: boolean = false): void {
         let time = date.getTime();
         let index = this.date_list.findIndex(d => d.getTime() === time);
         if (index == -1) return;
         
-        let dayElement: HTMLElement = this.html.childNodes[index] as HTMLElement;
+        let dayElement: HTMLElement = this.html_days[index] as HTMLElement;
         let stage = dayElement.getAttribute("stage");
 
         if (stage === "null" || stage === "took") {
@@ -441,15 +503,15 @@ class Home {
 
     }
 
-    private async participate(date: Date, snacks: string[]): Promise<void> {  
-        if (!await databaseManager.participate(userManager.getUser().uid, date.getTime(), snacks)) {
+    private async participate(date: Date, snacks: string[], participate_as:string): Promise<void> {  
+        if (!await databaseManager.participate(userManager.getUser().uid, date.getTime(), snacks, participate_as)) {
             throw new Error("Impossible de participer à ce goûter, veuillez réessayer plus tard.");
         }
     }
 
-    private async modify_participation(date: Date, snacks: string[]): Promise<void> {
+    private async modify_participation(date: Date, snacks: string[], participate_as:string): Promise<void> {
         let user = this.db_data[date.getTime()].user;
-        if (!await databaseManager.modify_participation(user, date.getTime(), snacks)) {
+        if (!await databaseManager.modify_participation(user, date.getTime(), snacks, participate_as)) {
             throw new Error("Impossible de modifier votre participation à ce goûter, veuillez réessayer plus tard.");
         }
     }

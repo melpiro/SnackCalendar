@@ -3,7 +3,7 @@
 
 header {
     width: 100%;
-    height: ratio-from(50px);
+    height: ratio-from(60px);
     background-color: #393939;
     display: flex;
     justify-content: end;
@@ -11,12 +11,20 @@ header {
     padding: 0 ratio-from(20px);
     box-sizing: border-box;
     box-shadow: 0 ratio-from(5px) ratio-from(15px) rgba(0, 0, 0, 0.369);
+
+    .active{
+        color: #5d9dc7;
+    }
+}
+
+#nav{
+    flex-grow: 1;
 }
 
 header a {
     color: white;
     text-decoration: none;
-    font-size: ratio-from(20px);
+    font-size: ratio-from(30px);
     margin-left: ratio-from(20px);
     transition: color 0.3s ease;
 

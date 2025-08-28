@@ -12,28 +12,46 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     // flex-wrap: wrap;
-    width: ratio-from(1200px);
+    width: ratio-from(1600px);
+    padding: 0 ratio-from(20px);
     margin-bottom: 50vh;
     row-gap: ratio-from(20px);
+
+    h2{
+        width: 100%;
+        text-align: center;
+    }
 
     .day{
         display: flex;
         flex-direction: column;
 
-        width: ratio-from(300px);
-        height: ratio-from(300px);
+        width: ratio-from(480px);
+        height: ratio-from(480px);
+    }
+    .filler{
+        width: ratio-from(480px);
+        height: ratio-from(0px);
     }
 
     .date{
-        background-color: #264357;
-        border-right: solid ratio-from(2px) #000000;
-        color: white;
-        height: ratio-from(40px);
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: ratio-from(25px);
+
+        height: ratio-from(50px);
+        font-size: ratio-from(30px);
+
+        background-color: #264357;
+        color: white;
+
+        border-right: solid ratio-from(2px) #000000;
+        border-left: solid ratio-from(2px) #000000;
+        margin-left: ratio-from(-2px);
+        box-sizing: border-box; 
+
         border-top: solid ratio-from(2px) #000000;
     }
     // one over two
@@ -41,9 +59,9 @@
         background-color: #36566b;
     }
 
-    .day:nth-child(4n+1) .date{
-        border-left: solid ratio-from(2px) #000000;
-    }
+    // .day:nth-child(4n+1) .date{
+    //     border-left: solid ratio-from(2px) #000000;
+    // }
 
 
     .today>.date{
@@ -53,6 +71,8 @@
     .content{
         background-color: #f0f0f0;
         border-right: solid ratio-from(2px) rgb(88, 88, 88);
+        border-left: solid ratio-from(2px) rgb(88, 88, 88);
+        margin-left: ratio-from(-2px);
         
         flex: 1;
         display: flex;
@@ -65,9 +85,9 @@
 
     }
 
-    .day:nth-child(4n+1)>.content{
-        border-left: solid ratio-from(2px) rgb(88, 88, 88);
-    }
+    // .day:nth-child(4n+1)>.content{
+    //     border-left: solid ratio-from(2px) rgb(88, 88, 88);
+    // }
 
    
 
@@ -96,6 +116,35 @@
     }
     .edit-buttons>*{
         margin: 0 ratio-from(2px);
+    }
+
+    .confirm-delete{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        flex-direction: column;
+        color: white;
+        gap: ratio-from(20px);
+    }
+    .confirm-delete>div{
+        display: flex;
+        gap: ratio-from(20px);
+        flex-direction: row;
+    }
+
+
+    .as-name-container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: ratio-from(10px);
     }
     .buttons>*{
         margin: 0 ratio-from(5px);

@@ -1,0 +1,46 @@
+
+@import "sizing.scss";
+
+
+// table : border
+
+table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    margin: ratio-from(20px) 0;
+    background-color: white;
+    box-shadow: 0 ratio-from(2px) ratio-from(10px) rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    border: ratio-from(1px) solid #ddd;
+    padding: ratio-from(12px);
+    text-align: left;
+}
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+
+
+td.name-cell{
+    width: 30%;
+    min-width: fit-content;
+}
+td.name-cell input{
+    width: 90%;
+}
+
+
+td>div{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}

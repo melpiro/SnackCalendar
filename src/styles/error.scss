@@ -1,0 +1,14 @@
+@import "sizing.scss";
+
+#error-manager{
+    width: 100%;
+    padding: ratio-from(10px) ratio-from(20px);
+    box-sizing: border-box;
+    background-color: rgb(184, 12, 12);
+    color: white;
+    font-weight: bold;
+}
+
+#error-manager.info{
+    background-color: rgb(12, 115, 184);
+}

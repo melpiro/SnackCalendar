@@ -2,6 +2,9 @@
 @use "loading.scss";
 @use "calendar.scss";
 @use "header.scss";
+@use "error.scss";
+@use "form.scss";
+@use "admin.scss";
 @import "sizing.scss";
 
 body, html{
@@ -11,17 +14,23 @@ body, html{
 
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
 }
 
 *{
     font-family: "Quicksand", sans-serif;
-    font-size: ratio-from(20px);
+    font-size: ratio-from(25px);
 }
 
-.body{
-    max-width: 1000px;
+.line{
+    max-width: 1200px;
     width: 90vw;
     margin: 0 auto;
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: ratio-from(20px);
 }
 
 .hidden{
@@ -29,16 +38,17 @@ body, html{
 }
 
 
-h1{
-    font-size: ratio-from(50px);
+h1, .h1{
+    font-size: ratio-from(70px);
     margin: ratio-from(20px) 0;
+    font-weight: bold;
 }
 h2{
-    font-size: ratio-from(40px);
+    font-size: ratio-from(50px);
     margin: ratio-from(10px) 0;
 }
 h3{
-    font-size: ratio-from(25px);
+    font-size: ratio-from(35px);
     margin: ratio-from(5px) 0;
 }
 
@@ -76,6 +86,7 @@ input[type=text]:focus, input[type=password]:focus{
     text-decoration: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-weight: bold;
 
     &:hover{
         background-color: rgb(50, 50, 50);
@@ -83,18 +94,38 @@ input[type=text]:focus, input[type=password]:focus{
 }
 .btn.material-symbols-outlined{
     padding: ratio-from(5px);
+    font-weight: normal;
 }
 
 .btn.valid{
     background-color: rgb(123, 206, 158);
 }
+.form .btn.valid{
+    background-color: rgb(2, 124, 67);
+    color: white;
+}
 .btn.edit{
     background-color: rgb(240, 207, 75);
+}
+.form .btn.edit{
+    background-color: rgb(209, 126, 17);
+    color: white;
 }
 .btn.delete{
     background-color: rgb(231, 129, 129);
 }
 
 .material-symbols-outlined {
-    font-size: ratio-from(25px) !important;
+    font-size: ratio-from(30px) !important;
+}
+
+.icon{
+    width: ratio-from(70px);
+    height: ratio-from(70px);
+}
+
+
+a{
+    color: inherit;
+    text-decoration: underline;
 }

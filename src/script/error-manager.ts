@@ -34,6 +34,31 @@ class ErrorManager {
 
         });
     }
+
+    public showSuccess(message: string): void {
+        if (this.timeout_callback != null) {
+            clearTimeout(this.timeout_callback);
+        }
+        this.html!.classList.remove('hidden');
+        this.html!.classList.add('info');
+        this.html!.innerText = message;
+        this.timeout_callback = setTimeout(() => {
+            this.html!.classList.add('hidden');
+            this.html!.classList.remove('info');
+            this.html!.innerText = '';
+        }, 5000);
+    }
+    public showError(message: string): void {
+        if (this.timeout_callback != null) {
+            clearTimeout(this.timeout_callback);
+        }
+        this.html!.classList.remove('hidden');
+        this.html!.innerText = message;
+        this.timeout_callback = setTimeout(() => {
+            this.html!.classList.add('hidden');
+            this.html!.innerText = '';
+        }, 5000);
+    }
 }
 
 
